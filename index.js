@@ -1,15 +1,13 @@
 const express = require('express');
 const app = express();
-const port = process.env.PORT || 3000;
-const quotesRouter = require('./routes/quotes');
+const port = process.env.PORT || 8080;
+
 
 app.use(express.json());
 
 app.get('/', (req, res) => {
-  res.json({message: 'alive'});
+  res.json({message: 'health'});
 });
-
-app.use('/quotes', quotesRouter);
 
 app.listen(port, () => {
   console.log(`Example app listening at http://localhost:${port}`);

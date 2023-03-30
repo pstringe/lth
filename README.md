@@ -1,1 +1,1 @@
-# nodejs-sqlite
+# nodejs-sqlite-skeleton for Linus Health exercise
