@@ -1,31 +1,34 @@
 CREATE TABLE patient (
-	mrn VARCHAR(36) PRIMARY KEY,
-	first_name VARCHAR(15) NOT NULL,
-	last_name VARCHAR(15) NOT NULL,
+	mrn BLOB(16) PRIMARY KEY,
+	first_name TEXT NOT NULL,
+	last_name TEXT NOT NULL,
 	birth_date DATE NOT NULL,
-	location_id VARCHAR(36) NOT NULL,
+	location_id BLOB(16) NOT NULL,
 	FOREIGN KEY (location_id) REFERENCES location(location_id)
-)
+);
+
 
 CREATE TABLE appointment (
-	appointment_id VARCHAR(36) PRIMARY KEY,
-	mrn VARCHAR(36) NOT NULL,
-	npi VARCHAR(36) NOT NULL,
+	appointment_id BLOB(16) PRIMARY KEY,
+	mrn BLOB(16) NOT NULL,
+	npi BLOB(16) NOT NULL,
 	appointment_time DATETIME NOT NULL,
 	FOREIGN KEY (mrn) REFERENCES patient(mrn),
 	FOREIGN KEY (npi) REFERENCES physician(npi)
-)
+);
+
 
 CREATE TABLE location (
-	location_id VARCHAR(36) PRIMARY KEY,
-	location_name VARCHAR(50) NOT NULL
-)
+	location_id BLOB(16) PRIMARY KEY,
+	location_name TEXT NOT NULL
+);
+
 
 CREATE TABLE physician (
-	npi VARCHAR(36) PRIMARY KEY,
-	first_name VARCHAR(15) NOT NULL,
-	last_name VARCHAR(15) NOT NULL
-)
+	npi BLOB(16) PRIMARY KEY,
+	first_name TEXT NOT NULL,
+	last_name TEXT NOT NULL
+);
 
 CREATE INDEX appointment_mrn_idx ON appointment(mrn);
 CREATE INDEX appointment_npi_idx ON appointment(npi);
