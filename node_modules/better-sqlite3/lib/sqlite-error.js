@@ -12,7 +12,8 @@ function SqliteError(message, code) {
 	descriptor.value = '' + message;
 	Object.defineProperty(this, 'message', descriptor);
 	Error.captureStackTrace(this, SqliteError);
-	this.code = code;
+	descriptor.value = code;
+	Object.defineProperty(this, 'code', descriptor);
 }
 Object.setPrototypeOf(SqliteError, Error);
 Object.setPrototypeOf(SqliteError.prototype, Error.prototype);

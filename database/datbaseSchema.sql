@@ -1,3 +1,10 @@
+--Drop tables if they exist
+DROP TABLE IF EXISTS appointment;
+DROP TABLE IF EXISTS patient;
+DROP TABLE IF EXISTS location;
+DROP TABLE IF EXISTS physician;
+
+
 CREATE TABLE patient (
 	mrn BLOB(16) PRIMARY KEY,
 	first_name TEXT NOT NULL,

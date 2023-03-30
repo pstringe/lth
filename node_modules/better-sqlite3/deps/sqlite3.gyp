@@ -1,6 +1,7 @@
 # ===
 # This configuration defines options specific to compiling SQLite3 itself.
 # Compile-time options are loaded by the auto-generated file "defines.gypi".
+# Before SQLite3 is compiled, it gets extracted from "sqlite3.tar.gz".
 # The --sqlite3 option can be provided to use a custom amalgamation instead.
 # ===
 
@@ -14,31 +15,24 @@
       'conditions': [
         ['sqlite3 == ""', {
           'actions': [{
-            'action_name': 'copy_builtin_sqlite3',
-            'inputs': [
-              'sqlite3/sqlite3.c',
-              'sqlite3/sqlite3.h',
-              'sqlite3/sqlite3ext.h',
-            ],
+            'action_name': 'extract_sqlite3',
+            'inputs': ['sqlite3.tar.gz'],
             'outputs': [
               '<(SHARED_INTERMEDIATE_DIR)/sqlite3/sqlite3.c',
               '<(SHARED_INTERMEDIATE_DIR)/sqlite3/sqlite3.h',
               '<(SHARED_INTERMEDIATE_DIR)/sqlite3/sqlite3ext.h',
             ],
-            'action': ['node', 'copy.js', '<(SHARED_INTERMEDIATE_DIR)/sqlite3', ''],
+            'action': ['node', 'extract.js', '<(SHARED_INTERMEDIATE_DIR)/sqlite3'],
           }],
         }, {
           'actions': [{
-            'action_name': 'copy_custom_sqlite3',
-            'inputs': [
-              '<(sqlite3)/sqlite3.c',
-              '<(sqlite3)/sqlite3.h',
-            ],
+            'action_name': 'symlink_sqlite3',
+            'inputs': [],
             'outputs': [
               '<(SHARED_INTERMEDIATE_DIR)/sqlite3/sqlite3.c',
               '<(SHARED_INTERMEDIATE_DIR)/sqlite3/sqlite3.h',
             ],
-            'action': ['node', 'copy.js', '<(SHARED_INTERMEDIATE_DIR)/sqlite3', '<(sqlite3)'],
+            'action': ['node', 'symlink.js', '<(SHARED_INTERMEDIATE_DIR)/sqlite3', '<(sqlite3)'],
           }],
         }],
       ],
