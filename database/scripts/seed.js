@@ -16,9 +16,12 @@ const locations = require('../locations.json');
 */
 
 const uuidToBlob = (uuid) => {
-    if (!uuid) return null;
-    const hex = uuid.replace(/-/g, '');
-    const bytes = new Uint8Array(hex.match(/.{1,2}/g).map(byte => parseInt(byte, 16)));
+    const hex = uuid?.replace(/-/g, '');
+    const match = hex?.match(/.{1,2}/g);
+    if (!uuid || !match || match.length !== 16 || !hex) {
+        throw new Error('Invalid UUID');
+    }
+    const bytes = new Uint8Array(match.map(byte => parseInt(byte, 16)));
     return bytes;
 }
 
