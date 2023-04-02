@@ -1,6 +1,7 @@
 import sqlite3 from 'sqlite3';
+import { Appointment } from '../models/appointment';
 import { Patient } from '../models/patient';
-import { blobToUuid } from '../utils/blob';
+import { blobToUuid, uuidToBlob } from '../utils/blob';
 
 export class Database {
   private db: sqlite3.Database;
@@ -25,8 +26,10 @@ export class Database {
     });
   }
 
+/*
   public async findPatients(queryParams: Partial<Patient>): Promise<Patient[]> {
     const { firstName, lastName, birthdate, mrn, location } = queryParams;
+    
     const query = `
         SELECT * FROM patient
         WHERE
@@ -36,6 +39,8 @@ export class Database {
             mrn LIKE ? OR
             location_id LIKE ?
     `;
+    
+
     const patientRows = await new Promise<Patient[]>((resolve, reject) => {
         this.db.all<Patient>(query, [firstName, lastName, birthdate, mrn, location], (err, rows) => {
             if (err) {
@@ -47,8 +52,80 @@ export class Database {
     });
     return patientRows;
 }
+*/
 
-  public async findPatientsByAppointmentDateRange(startDate: string, endDate: string): Promise<Patient[]> {
+public async findPatients(queryParams: Partial<Patient>): Promise<Patient[]> {
+    const { firstName, lastName, birthdate, mrn, location } = queryParams;
+      
+    const query = `
+      SELECT * FROM patient
+      WHERE
+        first_name LIKE ? OR
+        last_name LIKE ? OR
+        birth_date LIKE ? OR
+        mrn LIKE ? OR
+        location_id LIKE ?
+    `;
+      
+    const patientRows = await new Promise<Patient[]>((resolve, reject) => {
+      this.db.all<Patient>(query, [firstName, lastName, birthdate, mrn, location], async (err, rows) => {
+        if (err) {
+          reject(err);
+        } else {
+          // Loop through each patient record and fetch the associated appointments
+          const patientData = await Promise.all(
+            rows.map(async (patient) => {
+              const appointments = await this.findAppointmentsByMRN(blobToUuid(patient.mrn));
+              return { ...patient, appointments };
+            })
+          );
+          resolve(patientData);
+        }
+      });
+    });
+    return patientRows;
+  }
+  
+private async findAppointmentsByMRN(mrn: string): Promise<Appointment[]> {
+    console.log('mrn: ', mrn)
+    const query = `
+        SELECT * FROM appointment
+        WHERE mrn = ?
+    `;
+
+    const appointmentRows = await new Promise<Appointment[]>((resolve, reject) => {
+        this.db.all<Appointment>(query, [uuidToBlob(mrn)], (err, rows) => {
+        if (err) {
+            reject(err);
+        } else {
+            resolve(rows);
+        }
+        });
+    });
+
+    return appointmentRows;
+}
+  
+public async findAppointmentsByPatientId(patientId: string): Promise<Patient[]> {
+    const query = `
+      SELECT * FROM appointment
+      WHERE  = ?
+    `;
+
+    let patientRows: Patient[] = [];
+
+    const rows = await this.db.all<Patient>(query, [patientId], (err, rows) => {
+        if (err) {
+            throw err;
+        }
+        patientRows = rows;
+        return rows;
+    });
+
+    return patientRows;
+}
+
+public async findPatientsByAppointmentDateRange(startDate: string, endDate: string): Promise<Patient[]> {
     const query = `
       SELECT * FROM patient
       WHERE appointmentDate BETWEEN ? AND ?

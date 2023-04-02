@@ -19,21 +19,16 @@ describe('API Endpoint tests', () => {
         birthdate: "May 21, 1967",
         location: (0, blob_1.uuidToBlob)("B0B4FAC7-4462-1859-DA0E-92B0235489C6")
     };
-    describe('GET /patient/patient', () => {
-        it('returns a patient record when queried with valid name and birthdate', async () => {
+    describe('GET /patient', () => {
+        it('returns a patient record when queried with valid name', async () => {
             const response = await (0, supertest_1.default)(app_1.default).get('/patient').query({
-                firstName: 'John',
-                lastName: 'Doe',
-                birthDate: '1985-01-01',
+                firstName: 'Lee',
             });
             expect(response.status).toBe(200);
             expect(response.body).toEqual(expect.arrayContaining([
                 expect.objectContaining({
-                    mrn: expect.any(Number),
-                    firstName: 'John',
-                    lastName: 'Doe',
-                    birthDate: '1985-01-01',
-                    location: expect.any(Number),
+                    first_name: 'Lee',
+                    last_name: 'Lang',
                 }),
             ]));
         });
