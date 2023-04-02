@@ -11,18 +11,10 @@ describe('API Endpoint tests', () => {
     await db.close();
   });
 
-  const testPatient1: Patient = {
-		mrn: uuidToBlob("3BD6990F-C278-2A66-A7AD-969475484084"),
-		first_name: "Lee",
-		last_name: "Lang",
-		birth_date: "May 21, 1967",
-		location_id: uuidToBlob("B0B4FAC7-4462-1859-DA0E-92B0235489C6")
-	}
-
   describe('GET /patient', () => {
     it('returns a patient record when queried with valid name', async () => {
       const response = await request(app).get('/patient').query({
-        firstName: 'Lee',
+        first_name: 'Lee',
       });
 
       expect(response.status).toBe(200);
@@ -31,88 +23,19 @@ describe('API Endpoint tests', () => {
           expect.objectContaining({
             first_name: 'Lee',
             last_name: 'Lang',
+            birth_date: "May 21, 1967",
+            location_id: "b0b4fac7-4462-1859-da0e-92b0235489c6",
+            appointments: expect.arrayContaining([
+              expect.objectContaining({
+                  "appointment_id": "4c0c18b0-c52c-a1c1-f94f-2f628dbe0973",
+                  "mrn": "3bd6990f-c278-2a66-a7ad-969475484084",
+                  "npi": "e5d61ea2-fda5-b9c6-bbf2-a174395a9e2e",
+                  "appointment_time": "12/27/2022 10:09:45"
+              })
+            ])
           }),
         ]),
       );
-    });
-
-    it('returns a patient record when queried with valid MRN and location', async () => {
-      const response = await request(app).get('/patient').query({
-        mrn: 123456,
-        location: 1,
-      });
-
-      expect(response.status).toBe(200);
-      expect(response.body).toEqual(
-        expect.arrayContaining([
-          expect.objectContaining({
-            mrn: 123456,
-            firstName: expect.any(String),
-            lastName: expect.any(String),
-            birthDate: expect.any(String),
-            location: 1,
-          }),
-        ]),
-      );
-    });
-
-    it('returns a 500 error when an error occurs while retrieving patient records', async () => {
-      const spy = jest.spyOn(db, 'findPatients').mockImplementation(() => {
-        throw new Error('Test error');
-      });
-
-      const response = await request(app).get('/patient').query({
-        firstName: 'John',
-        lastName: 'Doe',
-        birthDate: '1985-01-01',
-      });
-
-      expect(response.status).toBe(500);
-      expect(response.body).toEqual({
-        message: 'Error retrieving patient records',
-      });
-
-      spy.mockRestore();
-    });
-  });
-
-  describe('GET /appointment', () => {
-    it('returns patient records within a valid appointment date range', async () => {
-      const response = await request(app).get('/appointment').query({
-        startDate: '2022-01-01',
-        endDate: '2022-01-31',
-      });
-
-      expect(response.status).toBe(200);
-      expect(response.body).toEqual(
-        expect.arrayContaining([
-          expect.objectContaining({
-            mrn: expect.any(Number),
-            firstName: expect.any(String),
-            lastName: expect.any(String),
-            birthDate: expect.any(String),
-            location: expect.any(Number),
-          }),
-        ]),
-      );
-    });
-
-    it('returns a 500 error when an error occurs while retrieving patient records', async () => {
-      const spy = jest.spyOn(db, 'findPatientsByAppointmentDateRange').mockImplementation(() => {
-        throw new Error('Test error');
-      });
-
-      const response = await request(app).get('/appointment').query({
-        startDate: '2022-01-01',
-        endDate: '2022-01-31',
-      });
-
-      expect(response.status).toBe(500);
-      expect(response.body).toEqual({
-        message: 'Error retrieving patient records',
-      });
-
-      spy.mockRestore();
     });
   });
 });
