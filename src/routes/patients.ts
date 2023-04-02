@@ -1,5 +1,5 @@
 import express from 'express';
-import { Patient, PatientRequest } from '../models/patient';
+import { PatientRequest } from '../models/patient';
 import { findPatients, findPatientsByAppointmentDateRange } from '../services/patients';
 
 const router = express.Router();

@@ -1,8 +1,6 @@
 import { Database } from '../src/services/database';
-import { Patient } from '../src/models/patient';
 import request from 'supertest';
 import app from '../src/app';
-import { uuidToBlob } from '../src/utils/blob';
 
 describe('API Endpoint tests', () => {
   let db: Database = new Database();
