@@ -7,7 +7,7 @@
     "test": "jest",
     "build": "npx tsc",
     "start": "npx tsc; node ./build/app.js",
-    "dev": "npx tsc -w & nodemon -q -w dist ./build/app.js",
+    "dev": "nodemon",
     "clean": "rm -rf ./build",
     "initDBD": "sqlite3 database.db < database/datbaseSchema.sql",
     "seed": "npx tsc; node ./database/scripts/seed.js"

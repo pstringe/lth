@@ -9,7 +9,6 @@ app.use('/patient', patientRouter);
 
 app.listen(PORT, (): void => {
     console.log('SERVER IS UP ON PORT:', PORT);
-    console.log({ patientRouter }, patientRouter.stack);
 });
 
 export default app;
