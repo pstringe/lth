@@ -14,6 +14,8 @@ export interface PatientRequest {
     last_name: string;
     birth_date: string;
     location_id: string;
+    start_date?: string;
+    end_date?: string;
 }
 
 export interface PatientResponse extends PatientRequest{
