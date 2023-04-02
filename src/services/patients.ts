@@ -4,13 +4,13 @@ import { PatientRequest } from '../models/patient';
 const db = new Database();
 
 export async function findPatients(queryParams: Partial<PatientRequest>) {
-  const { first_name, last_name, birthdate, mrn, location_id } = queryParams;
+  const { first_name, last_name, birth_date, mrn, location_id } = queryParams;
 
   try {
     const result = await db.findPatients({
       first_name,
       last_name,
-      birthdate,
+      birth_date,
       mrn,
       location_id,
     });
