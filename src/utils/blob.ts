@@ -11,3 +11,11 @@ export const uuidToBlob = (uuid: string) => {
     const bytes = new Uint8Array(match.map(byte => parseInt(byte, 16)));
     return bytes;
 }
+
+export const blobToUuid = (blob: Uint8Array) => {
+    const hex = Array.from(blob, byte => {
+        return ('0' + (byte & 0xff).toString(16)).slice(-2);
+    }).join('');
+    const uuid = `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
+    return uuid;
+}

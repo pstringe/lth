@@ -1,5 +1,6 @@
 import sqlite3 from 'sqlite3';
 import { Patient } from '../models/patient';
+import { blobToUuid } from '../utils/blob';
 
 export class Database {
   private db: sqlite3.Database;
@@ -26,7 +27,6 @@ export class Database {
 
   public async findPatients(queryParams: Partial<Patient>): Promise<Patient[]> {
     const { firstName, lastName, birthdate, mrn, location } = queryParams;
-    let patientRows: Patient[] = [];
     const query = `
         SELECT * FROM patient
         WHERE
@@ -36,17 +36,17 @@ export class Database {
             mrn LIKE ? OR
             location_id LIKE ?
     `;
-
-    await this.db.all<Patient>(query, [firstName ?? '', lastName ?? '', birthdate ?? '', mrn ?? '', location ?? ''], (err, rows) => {
-      if (err) {
-        throw err;
-      }
-      patientRows = rows;
-      console.log({rows})
-      return rows;
+    const patientRows = await new Promise<Patient[]>((resolve, reject) => {
+        this.db.all<Patient>(query, [firstName, lastName, birthdate, mrn, location], (err, rows) => {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(rows);
+            }
+        });
     });
     return patientRows;
-  }
+}
 
   public async findPatientsByAppointmentDateRange(startDate: string, endDate: string): Promise<Patient[]> {
     const query = `
