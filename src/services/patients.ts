@@ -1,10 +1,18 @@
-import { Database } from './database';
-import { PatientRequest } from '../models/patient';
+import { Database } from "./database";
+import { PatientRequest } from "../models/patient";
 
 const db = new Database();
 
 export async function findPatients(queryParams: Partial<PatientRequest>) {
-  const { first_name, last_name, birth_date, mrn, location_id, start_date, end_date } = queryParams;
+  const {
+    first_name,
+    last_name,
+    birth_date,
+    mrn,
+    location_id,
+    start_date,
+    end_date,
+  } = queryParams;
 
   try {
     const result = await db.findPatients({
@@ -19,6 +27,6 @@ export async function findPatients(queryParams: Partial<PatientRequest>) {
 
     return result;
   } catch (error) {
-    throw new Error('Error retrieving patient records');
+    throw new Error("Error retrieving patient records");
   }
 }
