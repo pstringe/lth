@@ -1,6 +1,7 @@
 import { Database } from '../src/services/database';
 import request from 'supertest';
 import app from '../src/app';
+import exp from 'constants';
 
 describe('API Endpoint tests', () => {
   let db: Database = new Database();
@@ -146,4 +147,29 @@ describe('API Endpoint tests', () => {
       );
     });
   });
+
+  it ('returns a patient record when queried with a birth date', async () => {
+    const response = await request(app).get('/patient').query({
+      birth_date: '1988-07-04'
+    });
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          "mrn": "5294aab5-c496-8e95-cdba-6c2d5cf9949a",
+          "first_name": "Graiden",
+          "last_name": "Osborn",
+          "birth_date": "Jul 4, 1988",
+          "location_id": "f3b1d493-de73-1b5b-e603-935f6fe577f7",
+          "appointments": expect.arrayContaining([
+              expect.objectContaining({
+                  "appointment_id": "5296aab5-c496-8e95-cdba-6c2d5cf9949a",
+                  "mrn": "5294aab5-c496-8e95-cdba-6c2d5cf9949a",
+                  "npi": "cdbe30aa-4173-64a4-8462-828619479265",
+                  "appointment_time": "02/20/2023 07:39:26"
+              })
+          ])
+      })
+    ])
+  )});
 });

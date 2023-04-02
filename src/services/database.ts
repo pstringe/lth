@@ -27,6 +27,40 @@ public async addPatients(patients: Patient[]) {
     });
 }
 
+private async getPatientData(rows: Patient[]): Promise<PatientResponse[]> {
+  return await Promise.all(
+    rows.map(async (patient) => {
+      const appointments = await this.findAppointmentsByMRN(blobToUuid(patient.mrn));
+      return {
+        ...patient,
+        mrn: blobToUuid(patient.mrn),
+        location_id: blobToUuid(patient.location_id),
+        appointments,
+      };
+    })
+  );
+}
+
+private filterByBirthDate(patientData: PatientResponse[], birth_date: string): PatientResponse[] {
+  const inputBirthDate = parse(birth_date, 'yyyy-MM-dd', new Date());
+  return patientData.filter((patient) => {
+    const dbBirthDate = parse(patient.birth_date, 'MMM d, yyyy', new Date());
+    return dbBirthDate.getTime() === inputBirthDate.getTime();
+  });
+}
+
+private filterByAppointmentDate(patientData: PatientResponse[], start_date: string, end_date: string): PatientResponse[] {
+  const startDate = parse(start_date, 'yyyy-MM-dd', new Date());
+  const endDate = parse(end_date, 'yyyy-MM-dd', new Date());
+  return patientData.filter((patient) =>
+    patient.appointments.some((appointment) => {
+      const appointmentTime = parse(appointment.appointment_time, 'MM/dd/yyyy HH:mm:ss', new Date());
+      const between = isWithinInterval(appointmentTime, { start: startDate, end: endDate });
+      return between;
+    })
+  );
+}
+
 public async findPatients(queryParams: Partial<PatientRequest> = {}): Promise<PatientResponse[]> {
   const { first_name, last_name, birth_date, mrn, location_id, start_date, end_date } = queryParams;
 
@@ -51,36 +85,14 @@ public async findPatients(queryParams: Partial<PatientRequest> = {}): Promise<Pa
       if (err) {
         reject(err);
       } else {
-        let patientData = await Promise.all(
-          rows.map(async (patient) => {
-            const appointments = await this.findAppointmentsByMRN(blobToUuid(patient.mrn));
-            return {
-              ...patient,
-              mrn: blobToUuid(patient.mrn),
-              location_id: blobToUuid(patient.location_id),
-              appointments,
-            };
-          })
-        );
+        let patientData = await this.getPatientData(rows);
 
         if (birth_date) {
-          const inputBirthDate = parse(birth_date, 'yyyy-MM-dd', new Date());
-          patientData = patientData.filter((patient) => {
-            const dbBirthDate = parse(patient.birth_date, 'MMM d, yyyy', new Date());
-            return dbBirthDate.getTime() === inputBirthDate.getTime();
-          });
+          patientData = this.filterByBirthDate(patientData, birth_date);
         }
 
         if (shouldFilterAppointments) {
-          const startDate = parse(start_date, 'yyyy-MM-dd', new Date());
-          const endDate = parse(end_date, 'yyyy-MM-dd', new Date());
-          patientData = patientData.filter((patient) =>
-            patient.appointments.some((appointment) => {
-              const appointmentTime = parse(appointment.appointment_time, 'MM/dd/yyyy HH:mm:ss', new Date());
-              const between = isWithinInterval(appointmentTime, { start: startDate, end: endDate });
-              return between;
-            })
-          );
+          patientData = this.filterByAppointmentDate(patientData, start_date, end_date);
         }
 
         resolve(patientData);
@@ -89,7 +101,6 @@ public async findPatients(queryParams: Partial<PatientRequest> = {}): Promise<Pa
   });
   return patientRows;
 }
-
 
 
 private async findAppointmentsByMRN(mrn: string): Promise<AppointmentResponse[]> {
