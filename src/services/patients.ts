@@ -1,18 +1,18 @@
 import { Database } from './database';
-import { Patient } from '../models/patient';
+import { PatientRequest } from '../models/patient';
 
 const db = new Database();
 
-export async function findPatients(queryParams: Partial<Patient>) {
-  const { firstName, lastName, birthdate, mrn, location } = queryParams;
+export async function findPatients(queryParams: Partial<PatientRequest>) {
+  const { first_name, last_name, birthdate, mrn, location_id } = queryParams;
 
   try {
     const result = await db.findPatients({
-      firstName,
-      lastName,
+      first_name,
+      last_name,
       birthdate,
       mrn,
-      location,
+      location_id,
     });
 
     return result;

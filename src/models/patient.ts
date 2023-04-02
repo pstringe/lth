@@ -1,18 +1,21 @@
-import { Appointment } from './appointment';
+import { AppointmentResponse } from './appointment';
 
 export interface Patient {
     mrn: Uint8Array;
-    firstName: string;
-    lastName: string;
-    birthdate: string;
-    location: Uint8Array;
+    first_name: string;
+    last_name: string;
+    birth_date: string;
+    location_id: Uint8Array;
 }
 
-export interface PatientResponse {
+export interface PatientRequest {
     mrn: string;
-    firstName: string;
-    lastName: string;
-    birthdate: string;
-    location: string;
-    appointments: Appointment[];
+    first_name: string;
+    last_name: string;
+    birth_date: string;
+    location_id: string;
+}
+
+export interface PatientResponse extends PatientRequest{
+    appointments: AppointmentResponse[];
 }

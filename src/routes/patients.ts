@@ -1,13 +1,14 @@
 import express from 'express';
-import { Patient } from '../models/patient';
+import { Patient, PatientRequest } from '../models/patient';
 import { findPatients, findPatientsByAppointmentDateRange } from '../services/patients';
 
 const router = express.Router();
+
 // Endpoint for querying patient records by name, birth date, MRN, and location
 router.get('/', async (req, res) => {
-    const { firstName, lastName, birthDate, mrn, location } = req.query;
+    const { first_name, last_name, birth_date, mrn, location_id } = req.query;
     try {
-      const result = await findPatients({ firstName, lastName, birthDate, mrn, location } as Partial<Patient>);
+      const result = await findPatients({ first_name, last_name, birth_date, mrn, location_id } as Partial<PatientRequest>);
       res.status(200).json(result);
     } catch (error) {
       res.status(500).json({ message: 'Error at /patient route' });

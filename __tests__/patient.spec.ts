@@ -13,10 +13,10 @@ describe('API Endpoint tests', () => {
 
   const testPatient1: Patient = {
 		mrn: uuidToBlob("3BD6990F-C278-2A66-A7AD-969475484084"),
-		firstName: "Lee",
-		lastName: "Lang",
-		birthdate: "May 21, 1967",
-		location: uuidToBlob("B0B4FAC7-4462-1859-DA0E-92B0235489C6")
+		first_name: "Lee",
+		last_name: "Lang",
+		birth_date: "May 21, 1967",
+		location_id: uuidToBlob("B0B4FAC7-4462-1859-DA0E-92B0235489C6")
 	}
 
   describe('GET /patient', () => {
