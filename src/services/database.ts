@@ -26,45 +26,48 @@ public async addPatients(patients: Patient[]) {
     });
 }
 
-public async findPatients(queryParams: Partial<PatientRequest>): Promise<PatientResponse[]> {
-    const { first_name, last_name, birth_date, mrn, location_id } = queryParams;
-      
-    const query = `
-      SELECT * FROM patient
-      WHERE
-        first_name LIKE ? OR
-        last_name LIKE ? OR
-        birth_date LIKE ? OR
-        mrn LIKE ? OR
-        location_id LIKE ?
-    `;
-    const patientRows = await new Promise<PatientResponse[]>((resolve, reject) => {
-      this.db.all<Patient>(query, [first_name, last_name, birth_date, mrn, location_id], async (err, rows) => {
-        if (err) {
-          reject(err);
-        } else {
-          // Loop through each patient record and fetch the associated appointments
-          const patientData = await Promise.all(
-            rows.map(async (patient) => {
-                console.log({ patient})
-                const appointments = await this.findAppointmentsByMRN(blobToUuid(patient.mrn));
-                return { 
-                    ...patient, 
-                    mrn: blobToUuid(patient.mrn),
-                    location_id: blobToUuid(patient.location_id),
-                    appointments 
-                };
-            })
-          );
-          console.log({ patientData })
-          resolve(patientData);
-        }
-      });
-    });
-    console.log({ patientRows })
-    return patientRows;
-}
+public async findPatients(queryParams: Partial<PatientRequest> = {}): Promise<PatientResponse[]> {
+  const { first_name, last_name, birth_date, mrn, location_id } = queryParams;
   
+  const hasQueryParams = first_name || last_name || birth_date || mrn || location_id;
+
+  const query = hasQueryParams
+      ? `
+        SELECT * FROM patient
+        WHERE
+          first_name LIKE ? OR
+          last_name LIKE ? OR
+          birth_date LIKE ? OR
+          mrn LIKE ? OR
+          location_id LIKE ?
+      `
+      : `SELECT * FROM patient`;
+
+  const params = hasQueryParams ? [first_name, last_name, birth_date, mrn, location_id] : [];
+
+  const patientRows = await new Promise<PatientResponse[]>((resolve, reject) => {
+    this.db.all<Patient>(query, params, async (err, rows) => {
+      if (err) {
+        reject(err);
+      } else {
+        const patientData = await Promise.all(
+          rows.map(async (patient) => {
+              const appointments = await this.findAppointmentsByMRN(blobToUuid(patient.mrn));
+              return { 
+                  ...patient, 
+                  mrn: blobToUuid(patient.mrn),
+                  location_id: blobToUuid(patient.location_id),
+                  appointments 
+              };
+          })
+        );
+        resolve(patientData);
+      }
+    });
+  });
+  return patientRows;
+}
+
 private async findAppointmentsByMRN(mrn: string): Promise<AppointmentResponse[]> {
     console.log('mrn: ', mrn)
     const query = `
@@ -92,35 +95,11 @@ private async findAppointmentsByMRN(mrn: string): Promise<AppointmentResponse[]>
     });
 
     return appointments;
-}
+  }
   
 
-public async findPatientsByAppointmentDateRange(startDate: string, endDate: string): Promise<Patient[]> {
-    const query = `
-      SELECT * FROM patient
-      WHERE appointmentDate BETWEEN ? AND ?
-    `;
-
-    let patientRows: Patient[] = [];
-
-    const rows = await this.db.all<Patient>(query, [startDate, endDate], (err, rows) => {
-        if (err) {
-            throw err;
-        }
-        patientRows = rows.map((row) => {
-            return {
-                ...row,
-                
-            };
-        });
-        return rows;
-    });
-
-    return patientRows;
-  }
-
   public async close() {
-     await this.db.close();
+      await this.db.close();
   }
 }
 

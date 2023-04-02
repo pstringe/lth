@@ -5,12 +5,12 @@
   "main": "index.js",
   "scripts": {
     "test": "jest",
-    "build": "npx tsc",
-    "start": "npx tsc; node ./build/app.js",
+    "build": "tsc",
+    "start": "tsc; node ./build/app.js",
     "dev": "nodemon",
     "clean": "rm -rf ./build",
     "initDBD": "sqlite3 database.db < database/datbaseSchema.sql",
-    "seed": "npx tsc; node ./database/scripts/seed.js"
+    "seed": "tsc; node ./database/scripts/seed.js"
   },
   "keywords": [],
   "author": "",
