@@ -1,5 +1,5 @@
 import sqlite3 from 'sqlite3';
-import { Appointment } from '../models/appointment';
+import { Appointment, AppointmentResponse } from '../models/appointment';
 import { Patient } from '../models/patient';
 import { blobToUuid, uuidToBlob } from '../utils/blob';
 
@@ -86,7 +86,7 @@ public async findPatients(queryParams: Partial<Patient>): Promise<Patient[]> {
     return patientRows;
   }
   
-private async findAppointmentsByMRN(mrn: string): Promise<Appointment[]> {
+private async findAppointmentsByMRN(mrn: string): Promise<AppointmentResponse[]> {
     console.log('mrn: ', mrn)
     const query = `
         SELECT * FROM appointment
@@ -103,27 +103,18 @@ private async findAppointmentsByMRN(mrn: string): Promise<Appointment[]> {
         });
     });
 
-    return appointmentRows;
-}
-  
-public async findAppointmentsByPatientId(patientId: string): Promise<Patient[]> {
-    const query = `
-      SELECT * FROM appointment
-      WHERE  = ?
-    `;
-
-    let patientRows: Patient[] = [];
-
-    const rows = await this.db.all<Patient>(query, [patientId], (err, rows) => {
-        if (err) {
-            throw err;
-        }
-        patientRows = rows;
-        return rows;
+    const appointments: AppointmentResponse[] = appointmentRows.map((row) => {
+        return {
+            ...row,
+            appointment_id: blobToUuid(row.appointment_id),
+            mrn: blobToUuid(row.mrn),
+            npi: blobToUuid(row.npi),
+        };
     });
 
-    return patientRows;
+    return appointments;
 }
+  
 
 public async findPatientsByAppointmentDateRange(startDate: string, endDate: string): Promise<Patient[]> {
     const query = `
@@ -137,7 +128,12 @@ public async findPatientsByAppointmentDateRange(startDate: string, endDate: stri
         if (err) {
             throw err;
         }
-        patientRows = rows;
+        patientRows = rows.map((row) => {
+            return {
+                ...row,
+                
+            };
+        });
         return rows;
     });
 
