@@ -11,6 +11,7 @@
     "clean": "rm -rf ./build",
     "initDBD": "sqlite3 database.db < database/datbaseSchema.sql",
     "seed": "tsc; node ./database/scripts/seed.js",
+    "setup": "npm run clean && npm run build && npm run initDBD && npm run seed",
     "format": "prettier --write ."
   },
   "keywords": [],

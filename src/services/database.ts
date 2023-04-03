@@ -187,9 +187,7 @@ export class Database {
     const physicianRows = await new Promise<Physician[]>((resolve, reject) => {
 
       this.db.all(query, [locationName], (err, rows) => {
-        console.log({rows})
         if (err) {
-          console.log({err})
           reject(err);
         } else {
           resolve(rows as Physician[]);

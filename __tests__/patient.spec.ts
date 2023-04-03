@@ -1,7 +1,6 @@
 import { Database } from "../src/services/database";
 import request from "supertest";
 import app from "../src/app";
-import exp from "constants";
 
 describe("API Endpoint tests", () => {
   let db: Database = new Database();
@@ -146,31 +145,60 @@ describe("API Endpoint tests", () => {
         ])
       );
     });
+  
+    it("returns a patient record when queried with a birth date", async () => {
+      const response = await request(app).get("/patient").query({
+        birth_date: "1988-07-04",
+      });
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            mrn: "5294aab5-c496-8e95-cdba-6c2d5cf9949a",
+            first_name: "Graiden",
+            last_name: "Osborn",
+            birth_date: "Jul 4, 1988",
+            location_id: "f3b1d493-de73-1b5b-e603-935f6fe577f7",
+            appointments: expect.arrayContaining([
+              expect.objectContaining({
+                appointment_id: "5296aab5-c496-8e95-cdba-6c2d5cf9949a",
+                mrn: "5294aab5-c496-8e95-cdba-6c2d5cf9949a",
+                npi: "cdbe30aa-4173-64a4-8462-828619479265",
+                appointment_time: "02/20/2023 07:39:26",
+              }),
+            ]),
+          }),
+        ])
+      );
+    });
   });
 
-  it("returns a patient record when queried with a birth date", async () => {
-    const response = await request(app).get("/patient").query({
-      birth_date: "1988-07-04",
+  describe("GET /physician", () => {
+    it("returns 3 physician records when queried with a the location name Quentin", async () => {
+      const response = await request(app).get("/physician/location").query({
+        name: "Quentin",
+      });
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            npi: "e5d61ea2-fda5-b9c6-bbf2-a174395a9e2e",
+            first_name: "Troy",
+            last_name: "Levine",
+          }),
+          expect.objectContaining({
+            npi: "887333e3-c393-9d52-da5a-fc7e06827e2c",
+            first_name: "Clarke",
+            last_name: "Howe",
+          }),
+          expect.objectContaining({
+            npi: "16967aae-1fb7-fa4b-91a8-4d745ec1ea16",
+            first_name: "Bruno",
+            last_name: "Craig",
+          }),
+        ])
+      );
     });
-    expect(response.status).toBe(200);
-    expect(response.body).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          mrn: "5294aab5-c496-8e95-cdba-6c2d5cf9949a",
-          first_name: "Graiden",
-          last_name: "Osborn",
-          birth_date: "Jul 4, 1988",
-          location_id: "f3b1d493-de73-1b5b-e603-935f6fe577f7",
-          appointments: expect.arrayContaining([
-            expect.objectContaining({
-              appointment_id: "5296aab5-c496-8e95-cdba-6c2d5cf9949a",
-              mrn: "5294aab5-c496-8e95-cdba-6c2d5cf9949a",
-              npi: "cdbe30aa-4173-64a4-8462-828619479265",
-              appointment_time: "02/20/2023 07:39:26",
-            }),
-          ]),
-        }),
-      ])
-    );
   });
+
 });
