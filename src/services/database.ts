@@ -174,25 +174,36 @@ export class Database {
     return appointments;
   }
 
-  public async findPractitionersByLocationName(location: string): Promise<any[]> {
+  public async findPhysiciansByLocationName(locationName: string): Promise<PhysicianResponse[]> {
     const query = `
       SELECT DISTINCT p.npi, p.first_name, p.last_name
       FROM physician p
-      JOIN appointment a ON a.npi = p.npi
-      JOIN patient pt ON pt.mrn = a.mrn
-      JOIN location l ON l.location_id = pt.location_id
-      WHERE l.location_name = ?
+      JOIN appointment a ON p.npi = a.npi
+      JOIN patient pt ON a.mrn = pt.mrn
+      JOIN location l ON pt.location_id = l.location_id
+      WHERE LOWER(l.location_name) = LOWER(?)
     `;
   
-    return new Promise<any[]>((resolve, reject) => {
-      this.db.all(query, [location], (err, rows) => {
+    const physicianRows = await new Promise<Physician[]>((resolve, reject) => {
+
+      this.db.all(query, [locationName], (err, rows) => {
+        console.log({rows})
         if (err) {
+          console.log({err})
           reject(err);
         } else {
-          resolve(rows);
+          resolve(rows as Physician[]);
         }
       });
     });
+  
+    const physicians = physicianRows.map(row => ({
+      npi: blobToUuid(row.npi),
+      first_name: row.first_name,
+      last_name: row.last_name
+    }));
+  
+    return physicians;
   }
 
   // Close the SQLite database connection
