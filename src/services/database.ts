@@ -174,6 +174,27 @@ export class Database {
     return appointments;
   }
 
+  public async findPractitionersByLocationName(location: string): Promise<any[]> {
+    const query = `
+      SELECT DISTINCT p.npi, p.first_name, p.last_name
+      FROM physician p
+      JOIN appointment a ON a.npi = p.npi
+      JOIN patient pt ON pt.mrn = a.mrn
+      JOIN location l ON l.location_id = pt.location_id
+      WHERE l.location_name = ?
+    `;
+  
+    return new Promise<any[]>((resolve, reject) => {
+      this.db.all(query, [location], (err, rows) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(rows);
+        }
+      });
+    });
+  }
+
   // Close the SQLite database connection
   public async close() {
     await this.db.close();

@@ -1,5 +1,5 @@
 interface Physician {
-  npi: string;
+  npi: Uint8Array;
   firstName: string;
   lastName: string;
 }
